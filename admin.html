@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Administrador · Pendientes y Compras</title>
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
+    <div>
+      <div class="eyebrow">Pendientes y Compras</div>
+      <h1>Administrador</h1>
+    </div>
+    <nav role="tablist" aria-label="Secciones">
+      <button class="tab" role="tab" id="tabSol" aria-selected="true" aria-controls="panelSol">Solicitudes</button>
+      <button class="tab" role="tab" id="tabCortes" aria-selected="false" aria-controls="panelCortes">Cortes enviados</button>
+    </nav>
+  </div>
+  <button id="btnRefrescar" class="btn btn-sm" type="button">Actualizar</button>
+</header>
+
+<main class="admin-main">
+  <div id="errorGlobal" class="alert alert-error" hidden></div>
+  <div id="avisoPendientes" class="alert alert-warn" hidden></div>
+
+  <!-- ===== Solicitudes ===== -->
+  <section id="panelSol" role="tabpanel" aria-labelledby="tabSol" style="display:flex;flex-direction:column;gap:20px">
+    <div class="kpis">
+      <div class="card kpi"><span class="muted">Nuevas</span><span class="n" id="kNuevas" style="color:var(--accent)">–</span></div>
+      <div class="card kpi"><span class="muted">Urgentes (pedido detenido)</span><span class="n" id="kUrg" style="color:var(--warn-strong)">–</span></div>
+      <div class="card kpi"><span class="muted">Enviadas a compras hoy</span><span class="n" id="kHoy">–</span></div>
+      <div class="card kpi"><span class="muted">Cortes por confirmar</span><span class="n" id="kPend">–</span></div>
+    </div>
+
+    <div class="card">
+      <div class="toolbar">
+        <label for="fBuscar" class="sr-only">Buscar</label>
+        <input id="fBuscar" class="input" placeholder="Buscar referencia, producto, operario o pedido">
+        <label for="fEstado" class="sr-only">Estado</label>
+        <select id="fEstado" class="select">
+          <option value="Nueva">Estado: Nuevas</option>
+          <option value="Enviada a compras">Estado: Enviadas a compras</option>
+          <option value="Comprada">Estado: Compradas</option>
+          <option value="Rechazada">Estado: Rechazadas</option>
+          <option value="Duplicada">Estado: Duplicadas</option>
+          <option value="">Estado: Todas</option>
+        </select>
+        <label for="fTipo" class="sr-only">Tipo</label>
+        <select id="fTipo" class="select">
+          <option value="">Tipo: Todos</option>
+          <option>Agotado</option>
+          <option>Pocas unidades</option>
+          <option>Dañado</option>
+          <option>Referencia no coincide</option>
+          <option>Otro</option>
+        </select>
+        <label class="inline"><input id="fUrg" type="checkbox" style="width:18px;height:18px"> Solo urgentes</label>
+      </div>
+
+      <div class="selbar" id="selbar" hidden>
+        <span><strong id="selN">0</strong> seleccionadas · se envían en un solo correo</span>
+        <div class="dest">
+          <label for="destinatario" class="sr-only">Correo de compras</label>
+          <input id="destinatario" class="input" type="email" placeholder="correo de compras">
+          <button id="btnGuardarCorreo" class="btn btn-sm" type="button" title="Guardar como correo por defecto">Guardar correo</button>
+          <button id="btnCorte" class="btn btn-sm btn-primary" type="button">Crear correo a compras</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="grid">
+          <thead>
+            <tr>
+              <th><input type="checkbox" id="selTodas" aria-label="Seleccionar todas las nuevas visibles"></th>
+              <th>Solicitud</th>
+              <th>Producto</th>
+              <th>Novedad</th>
+              <th>Stock Odoo / físico</th>
+              <th>Pedido</th>
+              <th>Operario</th>
+              <th>Reportes</th>
+              <th>Cant. mínima</th>
+              <th>Nota para compras</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="tbody">
+            <tr><td colspan="11" class="empty">Cargando…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Cortes ===== -->
+  <section id="panelCortes" role="tabpanel" aria-labelledby="tabCortes" hidden>
+    <div class="card">
+      <div class="toolbar" style="justify-content:space-between">
+        <div>
+          <div style="font-weight:600">Histórico de cortes enviados a compras</div>
+          <div class="muted">Respaldo de cada correo: qué se pidió, a quién y cuándo.</div>
+        </div>
+        <label for="fCorte" class="sr-only">Buscar en cortes</label>
+        <input id="fCorte" class="input" style="max-width:320px" placeholder="Buscar corte, referencia o producto">
+      </div>
+      <div id="listaCortes"><div class="empty">Cargando…</div></div>
+    </div>
+  </section>
+</main>
+
+<!-- Confirmación de envío -->
+<div id="modalConfirmar" class="modal-backdrop" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mcTitulo">
+    <h2 id="mcTitulo">¿Enviaste el correo?</h2>
+    <p id="mcTexto"></p>
+    <div class="actions" style="flex-direction:column">
+      <button id="mcSi" class="btn btn-primary" type="button">Sí, se envió</button>
+      <button id="mcAbrir" class="btn" type="button">Abrir Gmail otra vez</button>
+      <button id="mcNo" class="btn btn-danger" type="button">No se envió: anular corte</button>
+      <button id="mcLuego" class="btn" type="button" style="border:0">Lo confirmo después</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>

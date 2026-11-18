@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Reportar faltante · Pendientes y Compras</title>
+  <meta name="theme-color" content="#14181F">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Faltantes">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="app-form">
+  <header class="topbar">
+    <div>
+      <div class="eyebrow">Pendientes y Compras</div>
+      <h1>Reportar faltante</h1>
+    </div>
+    <button id="btnInstalar" class="btn-install" type="button" hidden>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
+      Instalar
+    </button>
+  </header>
+
+  <!-- ===== Formulario ===== -->
+  <form id="vistaForm" novalidate>
+    <div class="form-body">
+      <div id="errorInit" class="alert alert-error" hidden></div>
+
+      <div class="field">
+        <label for="operario">Operario</label>
+        <select id="operario" class="select" required>
+          <option value="">Cargando…</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="ref">Referencia interna de Odoo</label>
+        <div class="search-row">
+          <input id="ref" class="input" autocomplete="off" autocapitalize="characters" spellcheck="false" enterkeyhint="search" placeholder="Ej. REF-10234">
+          <button id="btnBuscar" class="btn btn-primary" type="button">Buscar</button>
+        </div>
+      </div>
+
+      <div id="resultados" aria-live="polite"></div>
+
+      <fieldset id="bloqueDetalle" style="border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:16px" disabled>
+        <div class="field">
+          <span class="label" id="lblTipo">¿Qué pasa con el producto?</span>
+          <div class="chips" role="radiogroup" aria-labelledby="lblTipo">
+            <label class="chip"><input type="radio" name="tipo" value="Agotado"><span>Agotado</span></label>
+            <label class="chip"><input type="radio" name="tipo" value="Pocas unidades"><span>Pocas unidades</span></label>
+            <label class="chip"><input type="radio" name="tipo" value="Dañado"><span>Dañado</span></label>
+            <label class="chip"><input type="radio" name="tipo" value="Otro"><span>Otro</span></label>
+            <label class="chip full"><input type="radio" name="tipo" value="Referencia no coincide"><span>La referencia no coincide con el producto</span></label>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label for="cantFisica">Quedan en físico (opcional)</label>
+            <input id="cantFisica" class="input" type="number" inputmode="decimal" min="0" step="any">
+          </div>
+          <div class="field">
+            <label for="pedido">Pedido que alistabas (opcional)</label>
+            <input id="pedido" class="input" autocapitalize="characters" placeholder="Ej. S04512">
+          </div>
+        </div>
+
+        <label class="check-urgent">
+          <input id="detenido" type="checkbox">
+          <span><strong>Pedido detenido:</strong> no se puede completar, no se hace el pack</span>
+        </label>
+
+        <div class="field">
+          <label for="observacion">Observación (opcional)</label>
+          <textarea id="observacion" class="textarea" rows="2" maxlength="500"></textarea>
+        </div>
+      </fieldset>
+
+      <div id="errorForm" class="alert alert-error" hidden></div>
+    </div>
+    <div class="form-footer">
+      <button id="btnEnviar" class="btn btn-primary btn-block" type="submit" disabled>Solicitar compra</button>
+    </div>
+  </form>
+
+  <!-- ===== Confirmación ===== -->
+  <section id="vistaOk" hidden>
+    <div class="done">
+      <div class="done-icon">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#15803D" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center">
+        <h2 id="okTitulo">Solicitud enviada</h2>
+        <div id="okSub" class="muted" style="font-size:15px">El administrador ya la ve en su bandeja.</div>
+      </div>
+      <div id="okResumen" class="card summary"></div>
+    </div>
+    <div class="form-footer">
+      <button id="btnOtro" class="btn btn-primary btn-block" type="button">Reportar otro producto</button>
+    </div>
+  </section>
+</div>
+
+<!-- Ayuda para instalar en iPhone -->
+<div id="ayudaIos" class="modal-backdrop" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="iosTitulo">
+    <h2 id="iosTitulo">Instalar en el iPhone</h2>
+    <p>En Safari toca el botón <strong>Compartir</strong> y luego <strong>Agregar a inicio</strong>.</p>
+    <button class="btn btn-primary" type="button" id="cerrarIos">Entendido</button>
+  </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/form.js"></script>
+</body>
+</html>
